@@ -12,7 +12,5 @@ export class NavMenuItem {
 
 export const HeaderMenuConstants = [
   new NavMenuItem("Мои отчеты", true, "/my-reports"),
-  new NavMenuItem("Отчеты пользователей", false, "/user-reports"),
-  // Возможно в будущем
-  // new NavMenuItem("Отчеты по задачам", "/issue-reports"),
+  // new NavMenuItem("Отчеты пользователей", false, "/user-reports"),
 ];

@@ -10,7 +10,6 @@ const Roles = () => {
     
     const [roles, setRoles] = useState<IRoleInfoDto[]>();
     const [selectedRoleId, setSelectedRoleId] = useState<string>()
-    
     const [showEditModal, setShowEditModal] = useState(false); 
 
     useEffect(() => {
@@ -35,6 +34,11 @@ const Roles = () => {
     const onEditRole = (roleId: string) =>{
         setShowEditModal(true);
         setSelectedRoleId(roleId);
+    }
+
+    const onAddRoleClick = () =>{
+        setSelectedRoleId(undefined);
+        setShowEditModal(true);
     }
 
     
@@ -68,12 +72,17 @@ const Roles = () => {
     return <>
         <MuiMaterial.Typography variant="h4">Роли</MuiMaterial.Typography>
         <ContainerLoader Loading={roles === undefined}>
+                <MuiMaterial.Stack alignItems="center">
+                    <MuiMaterial.IconButton area-label='create' onClick={onAddRoleClick}>
+                        <MuiIcon.AddCircleOutline fontSize="large"/>
+                    </MuiMaterial.IconButton>
+                </MuiMaterial.Stack>
             {
                 roles?.map(x => renderRole(x))
             }
         </ContainerLoader>
         {
-            showEditModal && <RoleEdit RoleId={selectedRoleId || ''} CloseModal={() => setShowEditModal(false)}/>
+            showEditModal && <RoleEdit roleId={selectedRoleId || ''} closeModal={() => setShowEditModal(false)}/>
         }
     </>
 }

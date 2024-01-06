@@ -1,10 +1,18 @@
 import { IPaginationResult } from "@/models/PaginationModel";
-import { IUserInfoDto } from "@/models/UserModels";
+import { ICreateUserRequest, IUserInfoDto } from "@/models/UserModels";
 import API from "@/utils/API";
 
 class UserDataService {
   getAllUsers() {
     return API.get<IUserInfoDto[]>("/user/list");
+  }
+
+  createUser(user: ICreateUserRequest) {
+    return API.post("/user", user);
+  }
+
+  updateUser(id: string, user: ICreateUserRequest) {
+    return API.put(`/user/${id}`, user);
   }
 
   getUserById(id: string) {

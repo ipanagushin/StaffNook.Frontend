@@ -1,10 +1,10 @@
 export interface IFileDto {
-  Id: string;
-  Bucket: FileStorageBucketEnum;
-  BucketName: string;
-  Path: string;
-  Name: string;
-  PreviewUrl: string;
+  id: string;
+  bucket: FileStorageBucketEnum;
+  bucketName: string;
+  path: string;
+  name: string;
+  previewUrl: string;
 }
 
 export enum FileStorageBucketEnum {

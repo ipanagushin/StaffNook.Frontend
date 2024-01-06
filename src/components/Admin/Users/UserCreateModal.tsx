@@ -1,7 +1,7 @@
 import { ChangeEvent, useEffect, useState } from "react";
 import * as MuiMaterial from "@mui/material";
 import * as MuiIcon from "@mui/icons-material";
-import { IUserInfoDto } from "@/models/UserModels";
+import { ICreateUserRequest } from "@/models/UserModels";
 import UserDataService from "@/services/UserDataService";
 import _ from "lodash";
 import ContainerLoader from "@/components/ContainerLoader";
@@ -9,32 +9,37 @@ import RoleDataService from "@/services/RoleDataService";
 import { IRoleInfoDto } from "@/models/RoleModels";
 import AvatarImageUploader from "@/components/FileUploader/AvatarImageUploader";
 import { IFileDto } from "@/models/FileStorageModels";
-import FileStorageService from "@/services/FileStorageService";
-import { useSetRecoilState } from "recoil";
-import { alertState } from "@/common/AppAtoms";
 import * as SystemAlertConstants from '@/config/SystemAlertConstants';
+import { alertState } from "@/common/AppAtoms";
+import { useSetRecoilState } from "recoil";
 
 interface IProps {
-  userId?: string;
   onClose: () => void;
   onRefresh: () => void;
   showModal: boolean;
 }
 
-const UserEditModal = (modalInfo: IProps) => {
-  const [user, setUser] = useState<IUserInfoDto | undefined>();
-  const [isLoad, setIsLoad] = useState(false);
+const UserCreateModal = (modalInfo: IProps) => {
+  const [user, setUser] = useState<ICreateUserRequest | undefined>();
+  const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState(false);
   const [firstNameError, setFirstNameError] = useState(false);
   const [lastNameError, setLastNameError] = useState(false);
   const [middleNameError, setMiddleNameError] = useState(false);
+  const [passwordError, setPasswordError] = useState(false);
   const [emailError, setEmailError] = useState(false);
   const [roleError, setRoleError] = useState(false);
   const [roles, setRoles] = useState<IRoleInfoDto[]>([]);
   const [filesError, setFilesError] = useState(false);
+  const [phoneError, setPhoneError] = useState(false);
   const [dateOfBirthError, setDateOfBirthError] = useState(false);
   const [defaultPickedFiles, setDefaultPickedFiles] = useState<IFileDto[]>([]);
   const setAlertMessage = useSetRecoilState(alertState);
+
+
+  const handleTogglePasswordVisibility = () => {
+    setShowPassword((prevShowPassword) => !prevShowPassword);
+  };
 
   const handleFilePickChange = (files: IFileDto[]) => {
     setUser(ref => ({
@@ -56,12 +61,6 @@ const UserEditModal = (modalInfo: IProps) => {
       ...ref,
       login: value,
     }));
-  };
-
-  const handleDateOfBirthChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value;
-    setDateOfBirthError(!value.trim());
-    setUser((prevUser) => ({ ...prevUser, dateOfBirth: value }));
   };
 
   const handleFirstNameChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -100,11 +99,30 @@ const UserEditModal = (modalInfo: IProps) => {
     setUser((prevUser) => ({ ...prevUser, middleName: value }));
   };
 
+  const handleDateOfBirthChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setDateOfBirthError(!value.trim());
+    setUser((prevUser) => ({ ...prevUser, dateOfBirth: value }));
+  };
+
+  const handlePasswordChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setPasswordError(!value.trim());
+    setUser((prevUser) => ({ ...prevUser, password: value }));
+  };
+
   const handleEmailChange = (event: ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
-    // Ваша логика валидации, если необходимо
+    // todo validate email
     setEmailError(!value.trim());
     setUser((prevUser) => ({ ...prevUser, email: value }));
+  };
+
+  const handlePhoneChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    // todo validate phone
+    setPhoneError(!value.trim());
+    setUser((prevUser) => ({ ...prevUser, phoneNumber: value }));
   };
 
   const handleRoleChange = (event: MuiMaterial.SelectChangeEvent) => {
@@ -124,6 +142,8 @@ const UserEditModal = (modalInfo: IProps) => {
     setRoleError(false);
     setDefaultPickedFiles([]);
     setFilesError(false);
+    setPasswordError(false);
+    setPhoneError(false);
     setDateOfBirthError(false);
   };
 
@@ -140,8 +160,10 @@ const UserEditModal = (modalInfo: IProps) => {
         setRoleError(false);
         setDefaultPickedFiles([]);
         setFilesError(false);
+        setPasswordError(false);
+        setPhoneError(false);
         setDateOfBirthError(false);
-        setAlertMessage(SystemAlertConstants.UpdateUserSuccessConstant);
+        setAlertMessage(SystemAlertConstants.CreateUserSuccessConstant);
     };
 
     if (!user?.login || user?.login.trim() === "") {
@@ -171,11 +193,9 @@ const UserEditModal = (modalInfo: IProps) => {
 
     //todo логика валидации для middleName, email, и roleId
 
-    if (user) {
-      UserDataService.updateUser(modalInfo.userId!, user)
-      .then(postAct)
-      .catch(()=>setAlertMessage(SystemAlertConstants.UpdateUserErrorConstant));
-    }
+    UserDataService.createUser(user)
+    .then(postAct)
+    .catch(()=> setAlertMessage(SystemAlertConstants.CreateUserErrorConstant));
   };
 
   useEffect(()=>{
@@ -192,39 +212,19 @@ const UserEditModal = (modalInfo: IProps) => {
   },[])
 
   useEffect(() => {
-    setIsLoad(true);
     setUser(undefined);
-
-    const fetchUser = async () => {
-      if (!_.isUndefined(modalInfo.userId) && modalInfo.showModal) {
-        try {
-          const response = await UserDataService.getUserById(modalInfo.userId);
-          setUser(response.data);
-          if(response.data.attachment){
-            let attachment = await FileStorageService.getById(response.data.attachment.id);
-            setDefaultPickedFiles([attachment.data]);
-        }
-        } catch (error) {
-          console.error(error);
-        }
-      }
-    };
-
-    fetchUser()
-      .then(() => setIsLoad(false))
-      .catch(console.error);
-  }, [modalInfo.userId, modalInfo.showModal]);
+  }, [modalInfo.showModal]);
 
   return (
     <>
-      <ContainerLoader Loading={isLoad}>
+      <ContainerLoader Loading={false}>
         <MuiMaterial.Dialog
           open={modalInfo.showModal}
           fullWidth={true}
-          maxWidth={'xs'}
+          maxWidth={'sm'}
         >
           <MuiMaterial.DialogTitle>
-            {_.isUndefined(modalInfo.userId) ? "Создание сотрудника" : "Редактирование сотрудника"}
+            Создание сотрудника
             <MuiMaterial.IconButton
               aria-label="close"
               onClick={handleClose}
@@ -232,7 +232,6 @@ const UserEditModal = (modalInfo: IProps) => {
                 position: "absolute",
                 right: 8,
                 top: 8,
-                color: (theme) => theme.palette.grey[500],
               }}
             >
               <MuiIcon.Close />
@@ -240,73 +239,26 @@ const UserEditModal = (modalInfo: IProps) => {
           </MuiMaterial.DialogTitle>
           <MuiMaterial.DialogContent>
             <MuiMaterial.Stack spacing={2}>
-              <MuiMaterial.FormControl>
-                <MuiMaterial.FormLabel required>Логин</MuiMaterial.FormLabel>
-                <MuiMaterial.TextField
-                  variant="standard"
-                  value={user?.login}
-                  onChange={handleLoginChange}
-                  error={loginError}
-                  helperText={loginError && "Поле не может быть пустым"}
-                />
-              </MuiMaterial.FormControl>
+
+                <MuiMaterial.FormControl>
+                    <MuiMaterial.FormLabel>Аватар</MuiMaterial.FormLabel>
+                    <AvatarImageUploader onChange={handleFilePickChange} Files={defaultPickedFiles} filePath='avatar'/>
+                    {filesError && (
+                        <MuiMaterial.Typography color={'red'} variant="caption">Файл должен быть прикреплён</MuiMaterial.Typography>
+                    )}
+                </MuiMaterial.FormControl>
 
               <MuiMaterial.FormControl>
-                <MuiMaterial.FormLabel required>Email</MuiMaterial.FormLabel>
-                <MuiMaterial.TextField
-                  variant="standard"
-                  value={user?.email}
-                  onChange={handleEmailChange}
-                  error={emailError}
-                  helperText={emailError && "Некорректный email"}
-                />
-              </MuiMaterial.FormControl>
-
-              <MuiMaterial.FormControl>
-                <MuiMaterial.FormLabel required>Имя</MuiMaterial.FormLabel>
-                <MuiMaterial.TextField
-                  variant="standard"
-                  value={user?.firstName}
-                  onChange={handleFirstNameChange}
-                  error={firstNameError}
-                  helperText={firstNameError && "Поле не может быть пустым"}
-                />
-              </MuiMaterial.FormControl>
-
-              <MuiMaterial.FormControl>
-                <MuiMaterial.FormLabel required>Фамилия</MuiMaterial.FormLabel>
-                <MuiMaterial.TextField
-                  variant="standard"
-                  value={user?.lastName}
-                  onChange={handleLastNameChange}
-                  error={lastNameError}
-                  helperText={lastNameError && "Поле не может быть пустым"}
-                />
-              </MuiMaterial.FormControl>
-
-              <MuiMaterial.FormControl>
-                <MuiMaterial.FormLabel>Отчество</MuiMaterial.FormLabel>
-                <MuiMaterial.TextField
-                  variant="standard"
-                  value={user?.middleName}
-                  onChange={handleMiddleNameChange}
-                  error={middleNameError}
-                  helperText={middleNameError && "Поле не может быть пустым"}
-                />
-              </MuiMaterial.FormControl>
-
-              <MuiMaterial.FormControl>
-                <MuiMaterial.FormLabel required>Роль</MuiMaterial.FormLabel>
+                <MuiMaterial.FormLabel>Роль</MuiMaterial.FormLabel>
                 <MuiMaterial.Select
-                  variant="outlined"
-                  value={user?.roleId || ""}
+                  label="Роль"
+                  variant="standard"
+                  size="small"
+                  value={user?.roleId}
                   onChange={handleRoleChange}
                   error={roleError}
                   displayEmpty
                 >
-                  <MuiMaterial.MenuItem value="" disabled>
-                    Выберите роль
-                  </MuiMaterial.MenuItem>
                   {roles.map((role) => (
                     <MuiMaterial.MenuItem key={role.id} value={role.id}>
                       {role.name}
@@ -316,7 +268,69 @@ const UserEditModal = (modalInfo: IProps) => {
                 {roleError && <MuiMaterial.FormHelperText error>Выберите роль</MuiMaterial.FormHelperText>}
               </MuiMaterial.FormControl>
 
-              <MuiMaterial.TextField
+                <MuiMaterial.TextField
+                  label="Логин"
+                  variant="standard"
+                  size="small"
+                  value={user?.login}
+                  onChange={handleLoginChange}
+                  error={loginError}
+                  helperText={loginError && "Поле не может быть пустым"}
+                />
+
+                <MuiMaterial.TextField
+                  label="Email"
+                  variant="standard"
+                  type="email"
+                  size="small"
+                  value={user?.email}
+                  onChange={handleEmailChange}
+                  error={emailError}
+                  helperText={emailError && "Некорректный email"}
+                />
+
+                <MuiMaterial.TextField
+                  label="Номер телефона"
+                  variant="standard"
+                  size="small"
+                  type="tel"
+                  value={user?.phoneNumber}
+                  onChange={handlePhoneChange}
+                  error={phoneError}
+                  helperText={phoneError && "Некорректный номер телефона"}
+                />
+
+                <MuiMaterial.TextField
+                  label="Фамилия"
+                  variant="standard"
+                  size="small"
+                  value={user?.lastName}
+                  onChange={handleLastNameChange}
+                  error={lastNameError}
+                  helperText={lastNameError && "Поле не может быть пустым"}
+                />
+
+                <MuiMaterial.TextField
+                  label="Имя"
+                  variant="standard"
+                  size="small"
+                  value={user?.firstName}
+                  onChange={handleFirstNameChange}
+                  error={firstNameError}
+                  helperText={firstNameError && "Поле не может быть пустым"}
+                />
+
+                <MuiMaterial.TextField
+                  label="Отчество"
+                  variant="standard"
+                  size="small"
+                  value={user?.middleName}
+                  onChange={handleMiddleNameChange}
+                  error={middleNameError}
+                  helperText={middleNameError && "Поле не может быть пустым"}
+                />
+
+                <MuiMaterial.TextField
                   label="Дата рождения"
                   variant="standard"
                   size="small"
@@ -324,20 +338,34 @@ const UserEditModal = (modalInfo: IProps) => {
                   InputLabelProps={{
                     shrink: true,
                   }}
-                  value={new Date(user?.dateOfBirth!)}
-                  // value={user?.dateOfBirth}
+                  value={user?.dateOfBirth}
                   onChange={handleDateOfBirthChange}
                   error={dateOfBirthError}
                   helperText={dateOfBirthError && "Поле не может быть пустым"}
                 />
 
-              <MuiMaterial.FormControl>
-                  <MuiMaterial.FormLabel required>Аватар</MuiMaterial.FormLabel>
-                  <AvatarImageUploader onChange={handleFilePickChange} Files={defaultPickedFiles} filePath='avatar'/>
-                  {filesError && (
-                      <MuiMaterial.Typography color={'red'} variant="caption">Файл должен быть прикреплён</MuiMaterial.Typography>
-                  )}
-              </MuiMaterial.FormControl>
+              <MuiMaterial.TextField
+                    label="Пароль"
+                    variant="standard"
+                    size="small"
+                    type={showPassword ? 'text' : 'password'}
+                    value={user?.password}
+                    onChange={handlePasswordChange}
+                    error={passwordError}
+                    helperText={passwordError && "Поле не может быть пустым"}
+                    InputProps={{
+                      endAdornment: (
+                        <MuiMaterial.InputAdornment position="end">
+                          <MuiMaterial.IconButton
+                            onClick={handleTogglePasswordVisibility}
+                            edge="end"
+                          >
+                            {showPassword ? <MuiIcon.VisibilityOff /> : <MuiIcon.Visibility/>}
+                          </MuiMaterial.IconButton>
+                        </MuiMaterial.InputAdornment>
+                      ),
+                    }}
+              />
 
               <MuiMaterial.Button variant="outlined" onClick={onSaveUser}>
                 Сохранить
@@ -350,4 +378,4 @@ const UserEditModal = (modalInfo: IProps) => {
   );
 };
 
-export default UserEditModal;
+export default UserCreateModal;

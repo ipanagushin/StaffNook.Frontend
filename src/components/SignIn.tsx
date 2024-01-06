@@ -49,7 +49,6 @@ export default function SignIn() {
         };
 
         let response = await IdentityService.login(loginRequest);
-
         CurrentUserService.setUserToken(response.data);
 
         window.open('/', '_self');

@@ -1,4 +1,4 @@
-import { ILoginRequest } from "@/models/IdentityModels";
+import { IChangePasswordRequest, ILoginRequest } from "@/models/IdentityModels";
 import { ITokenInfo, ICurrentUserInfo } from "@/models/StorageModels";
 import API from "@/utils/API";
 
@@ -9,6 +9,10 @@ class IdentityService {
 
   getCurrentUserInfo() {
     return API.get<ICurrentUserInfo>("/identity/currentUser");
+  }
+
+  changePassword(data: IChangePasswordRequest) {
+    return API.post("/identity/password/change", data);
   }
 }
 

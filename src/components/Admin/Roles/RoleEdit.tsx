@@ -9,8 +9,8 @@ import ContainerLoader from "@/components/ContainerLoader";
 
 
 interface IRoleEditProps{
-    RoleId: string,
-    CloseModal: () => void
+    roleId?: string,
+    closeModal: () => void
 }
 
 const RoleEdit = (props: IRoleEditProps) =>{
@@ -22,7 +22,7 @@ const RoleEdit = (props: IRoleEditProps) =>{
 
     useEffect(() => {
         const fetchRole = async () => {
-            let role = await RoleDataService.getById(props.RoleId);
+            let role = await RoleDataService.getById(props.roleId!);
             setRole(role.data);
         }
 
@@ -32,7 +32,9 @@ const RoleEdit = (props: IRoleEditProps) =>{
         }
 
         const fetchAll = async () =>{
-            await fetchRole();
+            if(props.roleId){
+                await fetchRole();
+            }
             await fetchClaims();    
         }
 
@@ -63,7 +65,7 @@ const RoleEdit = (props: IRoleEditProps) =>{
     const onClickSaveChanges = () =>{
         //todo save changes
         
-        props.CloseModal();
+        props.closeModal();
     }
 
     const renderClaims = (claims: {[name:string]:string}) =>{
@@ -105,12 +107,12 @@ const RoleEdit = (props: IRoleEditProps) =>{
     <ContainerLoader Loading={loader}>
         <MuiMaterial.Modal
             open={true}
-            onClose={props.CloseModal}
+            onClose={props.closeModal}
         >
             <MuiMaterial.Box sx={style}>
                 <MuiMaterial.IconButton
                             aria-label="close"
-                            onClick={props.CloseModal}
+                            onClick={props.closeModal}
                             sx={{
                                 position: 'absolute',
                                 right: 8,
@@ -122,7 +124,7 @@ const RoleEdit = (props: IRoleEditProps) =>{
                 </MuiMaterial.IconButton>
                 <MuiMaterial.Stack spacing={2}>
                     <MuiMaterial.Typography variant="h5">
-                        Редактирование роли "{role?.name}"
+                        { props.roleId ? `Редактирование роли "${role?.name}"` : "Создание роли" }
                     </MuiMaterial.Typography>
                     <MuiMaterial.FormControl>
                         <MuiMaterial.FormLabel>

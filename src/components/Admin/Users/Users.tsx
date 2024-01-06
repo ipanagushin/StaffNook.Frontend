@@ -11,6 +11,10 @@ import { alertState } from "@/common/AppAtoms";
 import * as SystemAlertConstants from '@/config/SystemAlertConstants';
 import DeleteModal from "../DeleteModal";
 import UserEditModal from "./UserEditModal";
+import UserCreateModal from "./UserCreateModal";
+import ChangePasswordModal from "./ChangePasswordModal";
+import IdentityService from "@/services/IdentityService";
+import { IChangePasswordRequest } from "@/models/IdentityModels";
 
 
 const Users = () =>{
@@ -18,11 +22,13 @@ const Users = () =>{
     const [users, setUsers] = useState<IUserInfoDto[]>();
     const [actualUser, setActualUser] = useState<IUserInfoDto>();
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const [isChangePasswordDialogOpen, setIsChangePasswordDialogOpen] = useState(false);
     const rowsPerPage = 10;
     const [page, setPage] = useState(1);
     const [elementCount, setElementCount] = useState(1);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [showEditModal, setShowEditModal] = useState(false);
+    const [showCreateModal, setShowCreateModal] = useState(false);
     const setAlertMessage = useSetRecoilState(alertState);
 
     const handleChange = (_e: any, page: React.SetStateAction<number>) => {
@@ -35,20 +41,49 @@ const Users = () =>{
         setIsDeleteDialogOpen(true);
     }
 
-    const handleDeleteConfirm = async (objectId?: string) => {
+    const onUserPasswordChangeClick = (user: IUserInfoDto) =>{
+        setActualUser(user);
+        setIsChangePasswordDialogOpen(true);
+    }
+
+    const handleDeleteConfirm = (objectId?: string) => {
         setActualUser(undefined);
         if(objectId) {
-            await UserDataService.delete(objectId);
+            UserDataService.delete(objectId)
+            .then(()=>{
+                setAlertMessage(SystemAlertConstants.DeleteUserSuccessConstant);
+            })
+            .catch(()=>{
+                setAlertMessage(SystemAlertConstants.DeleteUserErrorConstant);
+            });
         }
         onRefresh();
     }
 
-    const onAddNewsClick = () =>{
+    const handleChangePassword = (userId?: string, password?: string) => {
         setActualUser(undefined);
-        setShowEditModal(true);
+        if(userId && password) {
+            let request : IChangePasswordRequest={
+                userId: userId,
+                currentPassword: password,
+                newPassword: password
+            }
+            IdentityService.changePassword(request)
+            .then(()=>{
+                setAlertMessage(SystemAlertConstants.ChangePasswordSuccessConstant);
+            }).catch(()=>{
+                setAlertMessage(SystemAlertConstants.ChangePasswordErrorConstant);
+            });
+        }
+        onRefresh();
     }
 
-    const onEditNewsClick = (user: IUserInfoDto) =>{
+    const onAddUserClick = () =>{
+        setActualUser(undefined);
+        setShowCreateModal(true);
+    }
+
+    const onEditUserClick = (user: IUserInfoDto) =>{
         setActualUser(user);
         setShowEditModal(true);
     }
@@ -87,8 +122,12 @@ const Users = () =>{
     const renderActionsCard = (user: IUserInfoDto) =>{
         return (
             <>
+                <MuiMaterial.IconButton aria-label="password" onClick={()=> onUserPasswordChangeClick(user)}>
+                    <MuiIcon.Password/>
+                </MuiMaterial.IconButton>
+
                 <MuiMaterial.IconButton aria-label="edit">
-                    <MuiIcon.Edit onClick={()=>onEditNewsClick(user)}/>
+                    <MuiIcon.Edit onClick={()=>onEditUserClick(user)}/>
                 </MuiMaterial.IconButton>
                 
                 <MuiMaterial.IconButton aria-label="drop" onClick={()=> onDeleteUserClick(user)}>
@@ -103,15 +142,11 @@ const Users = () =>{
             <MuiMaterial.Card key={user.id} variant="outlined" sx={{
                 marginTop:'1%'
             }}>
-                <MuiMaterial.CardHeader 
+                <MuiMaterial.CardHeader
+                    avatar={<MuiMaterial.Avatar sx={{width:'100px', height:'100px'}} src={user.attachment?.previewUrl}/>}
                     title={renderTitleCard(user)}
                     action={renderActionsCard(user)}>
                 </MuiMaterial.CardHeader>
-                <MuiMaterial.CardContent>
-                    <MuiMaterial.Typography variant="body1">
-                        Email: {user.email}
-                    </MuiMaterial.Typography>
-                </MuiMaterial.CardContent>
             </MuiMaterial.Card>
         )
     }
@@ -124,7 +159,7 @@ const Users = () =>{
         ) : (
             <>
                 <MuiMaterial.Stack alignItems="center">
-                    <MuiMaterial.IconButton area-label='create' onClick={onAddNewsClick}>
+                    <MuiMaterial.IconButton area-label='create' onClick={onAddUserClick}>
                         <MuiIcon.AddCircleOutline fontSize="large"/>
                     </MuiMaterial.IconButton>
                 </MuiMaterial.Stack>
@@ -153,11 +188,24 @@ const Users = () =>{
                 showModal={showEditModal}
                 userId={actualUser?.id}
             />
+            <UserCreateModal 
+                onClose={() => setShowCreateModal(false)} 
+                onRefresh={onRefresh} 
+                showModal={showCreateModal}
+            />
+
             <DeleteModal 
             objectId={actualUser?.id} 
             showModal={isDeleteDialogOpen} 
             onClose={()=> setIsDeleteDialogOpen(false)}
             handleDeleteConfirm={handleDeleteConfirm}
+            />
+
+            <ChangePasswordModal
+                userId={actualUser?.id}
+                showModal={isChangePasswordDialogOpen}
+                onClose={() => setIsChangePasswordDialogOpen(false)}
+                handleChangePassword={handleChangePassword}
             />
             </>
         )}

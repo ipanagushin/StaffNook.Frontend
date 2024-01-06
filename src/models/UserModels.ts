@@ -1,13 +1,29 @@
+import { IFileDto } from "./FileStorageModels";
+
 export interface ICreateUserRequest {
-  firstName: string;
-  lastName: string;
-  middleName: string;
-  login: string;
-  password: string;
-  email: string;
-  phoneNumber: string;
-  attachmentId: string;
-  roleId: string;
+  firstName?: string;
+  lastName?: string;
+  middleName?: string;
+  login?: string;
+  password?: string;
+  email?: string;
+  phoneNumber?: string;
+  attachment?: IFileDto;
+  roleId?: string;
+  dateOfBirth?: string;
+}
+
+export interface IUpdateUserRequest {
+  firstName?: string;
+  lastName?: string;
+  middleName?: string;
+  login?: string;
+  password?: string;
+  email?: string;
+  phoneNumber?: string;
+  attachment?: IFileDto;
+  roleId?: string;
+  dateOfBirth?: string;
 }
 
 export interface IUserInfoDto {
@@ -16,7 +32,8 @@ export interface IUserInfoDto {
   lastName?: string;
   firstName?: string;
   middleName?: string;
-  role?: string;
+  roleId?: string;
   email?: string;
-  attachmentId?: string | null;
+  attachment?: IFileDto;
+  dateOfBirth?: string;
 }

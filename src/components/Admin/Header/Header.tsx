@@ -6,6 +6,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import * as MuiIcon from '@mui/icons-material';
 import { Link } from "react-router-dom";
 import { GroupedMenuItems, IGroupAdminMenu } from "./MenuItems";
+import ModeToggleButton from '@/components/ModeToggleButton';
 
 interface IAdminHeaderProps{
     PageId: string
@@ -43,7 +44,7 @@ const AdminHeader = (props: IAdminHeaderProps) => {
                             <Link key={menuItem.PageId} to={menuItem.Path} 
                                 style={{
                                 textDecorationLine:'none',
-                                color:'#58454B'
+                                color:'#8B7685'
                             }}
                                 onClick={_ => clickMenu(menuItem.PageId)}>
                                 <MuiMaterial.ListItemButton sx={{
@@ -51,7 +52,7 @@ const AdminHeader = (props: IAdminHeaderProps) => {
                                         backgroundColor: '#8B7685',
                                         color: 'white'
                                     }), "&:hover":{
-                                        color: '#58454B',
+                                        color: 'white',
                                         backgroundColor: '#8b768572'
                                     }
                                 }}>
@@ -127,6 +128,7 @@ const AdminHeader = (props: IAdminHeaderProps) => {
                 >
                 
                 </MuiMaterial.Typography>
+                <ModeToggleButton/>
                 <MuiMaterial.Button  
                   href='/'
                   color='inherit'

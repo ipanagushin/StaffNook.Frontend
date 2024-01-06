@@ -79,13 +79,16 @@ export interface IGroupAdminMenu{
 //     }
 // ]
 
-const Settings : IAdminMenuItem[] = [
+const Basic : IAdminMenuItem[] = [
     {
         Name: "Сотрудники",
         Path: "/admin/users",
         PageId: "users",
         Component: <Users/>
     },
+]
+
+const Settings : IAdminMenuItem[] = [
     {
         Name: "Роли",
         Path: "/admin/roles",
@@ -95,14 +98,10 @@ const Settings : IAdminMenuItem[] = [
 ];
 
 export const GroupedMenuItems :IGroupAdminMenu[] = [
-    // {
-    //     Name: "Основные",
-    //     MenuItems: Basic
-    // },
-    // {
-    //     Name: "Довуз",
-    //     MenuItems: Dovuz
-    // },
+    {
+        Name: "Основные",
+        MenuItems: Basic
+    },
     {
         Name: "Настройки системы",
         MenuItems: Settings
