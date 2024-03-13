@@ -1,3 +1,5 @@
+import News from "../News/News";
+import References from "../References/References";
 import Roles from "../Roles/Roles";
 import Users from "../Users/Users";
 
@@ -86,6 +88,12 @@ const Basic : IAdminMenuItem[] = [
         PageId: "users",
         Component: <Users/>
     },
+    {
+        Name: "Новости",
+        Path: "/admin/news",
+        PageId: "news",
+        Component: <News/>
+    },
 ]
 
 const Settings : IAdminMenuItem[] = [
@@ -94,6 +102,12 @@ const Settings : IAdminMenuItem[] = [
         Path: "/admin/roles",
         PageId: "roles",
         Component: <Roles/>
+    },
+    {
+        Name: "Справочники",
+        Path: "/admin/references",
+        PageId: "references",
+        Component: <References/>
     }
 ];
 

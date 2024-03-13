@@ -133,15 +133,8 @@ function Header() {
           <MuiMaterial.Box sx={{ flexGrow: 0 }}>
           <ModeToggleButton/>
               <MuiMaterial.IconButton onClick={handleOpenUserMenu} sx={{ p: 0, ml:1 }}>
-                <MuiMaterial.Avatar>
-                  {getInitials(currentUser?.fullName)}
-                </MuiMaterial.Avatar>
+                <MuiMaterial.Avatar src={currentUser?.avatarLink}/>
               </MuiMaterial.IconButton>
-              {/* <MuiMaterial.IconButton onClick={handleOpenUserMenu} sx={{ p: 0, ml:1 }}>
-                <MuiMaterial.Avatar src={getUserAvatarUrl(currentUser?.avatarId)}>
-                  {getInitials(currentUser?.display)}
-                </MuiMaterial.Avatar>
-              </MuiMaterial.IconButton> */}
             <MuiMaterial.Menu
               sx={{ mt: '45px' }}
               id="menu-appbar"

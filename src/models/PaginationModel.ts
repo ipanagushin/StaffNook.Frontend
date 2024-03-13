@@ -3,7 +3,7 @@ export interface IPaginationResult<T> {
   pageInfo: IPageInfo;
 }
 
-interface IPageInfo {
+export interface IPageInfo {
   totalCount: number;
   currentPage: number;
   totalPageCount: number;

@@ -1,6 +1,5 @@
 import Loader from "@/components/Loader";
-import UserDataService from "@/services/UserDataService";
-import { IUserInfoDto } from "@/models/UserModels";
+import NewsDataService from "@/services/NewsDataService";
 import { useEffect, useState } from "react";
 import * as MuiMaterial from "@mui/material";
 import * as MuiIcon from "@mui/icons-material";
@@ -10,19 +9,17 @@ import { useSetRecoilState } from "recoil";
 import { alertState } from "@/common/AppAtoms";
 import * as SystemAlertConstants from '@/config/SystemAlertConstants';
 import DeleteModal from "../DeleteModal";
-import UserEditModal from "./UserEditModal";
-import UserCreateModal from "./UserCreateModal";
-import ChangePasswordModal from "./ChangePasswordModal";
-import IdentityService from "@/services/IdentityService";
-import { IChangePasswordRequest } from "@/models/IdentityModels";
+import { INewsInfoDto } from "@/models/NewsModels";
+import { INewsPageFilter } from "@/models/PageFilters/NewsPageFilter";
+import NewsCreateModal from "./NewsCreateModal";
+import NewsEditModal from "./NewsEditModal";
 
 
-const Users = () =>{
+const News = () =>{
 
-    const [users, setUsers] = useState<IUserInfoDto[]>();
-    const [actualUser, setActualUser] = useState<IUserInfoDto>();
+    const [news, setNews] = useState<INewsInfoDto[]>();
+    const [actualNews, setActualNews] = useState<INewsInfoDto>();
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-    const [isChangePasswordDialogOpen, setIsChangePasswordDialogOpen] = useState(false);
     const rowsPerPage = 10;
     const [page, setPage] = useState(1);
     const [elementCount, setElementCount] = useState(1);
@@ -36,65 +33,46 @@ const Users = () =>{
         setPage(page);
     };
 
-    const onDeleteUserClick = (user: IUserInfoDto) =>{
-        setActualUser(user);
+    const onDeleteUserClick = (user: INewsInfoDto) =>{
+        setActualNews(user);
         setIsDeleteDialogOpen(true);
     }
 
-    const onUserPasswordChangeClick = (user: IUserInfoDto) =>{
-        setActualUser(user);
-        setIsChangePasswordDialogOpen(true);
-    }
-
     const handleDeleteConfirm = (objectId?: string) => {
-        setActualUser(undefined);
+        setActualNews(undefined);
         if(objectId) {
-            UserDataService.delete(objectId)
+            NewsDataService.delete(objectId)
             .then(()=>{
-                setAlertMessage(SystemAlertConstants.DeleteUserSuccessConstant);
+                setAlertMessage(SystemAlertConstants.DeleteNewsSuccessConstant);
             })
             .catch(()=>{
-                setAlertMessage(SystemAlertConstants.DeleteUserErrorConstant);
+                setAlertMessage(SystemAlertConstants.DeleteNewsErrorConstant);
             });
         }
         onRefresh();
     }
 
-    const handleChangePassword = (userId?: string, password?: string) => {
-        setActualUser(undefined);
-        if(userId && password) {
-            let request : IChangePasswordRequest={
-                userId: userId,
-                currentPassword: password,
-                newPassword: password
-            }
-            IdentityService.changePassword(request)
-            .then(()=>{
-                setAlertMessage(SystemAlertConstants.ChangePasswordSuccessConstant);
-            }).catch(()=>{
-                setAlertMessage(SystemAlertConstants.ChangePasswordErrorConstant);
-            });
-        }
-        onRefresh();
-    }
-
-    const onAddUserClick = () =>{
-        setActualUser(undefined);
+    const onAddNewsClick = () =>{
+        setActualNews(undefined);
         setShowCreateModal(true);
     }
 
-    const onEditUserClick = (user: IUserInfoDto) =>{
-        setActualUser(user);
+    const onEditUserClick = (user: INewsInfoDto) =>{
+        setActualNews(user);
         setShowEditModal(true);
     }
 
     const onRefresh = () =>{
         const getByFilter = async () => {
             setIsLoading(true);
-            const response = await UserDataService.getAdminByPageFilter(page, rowsPerPage);
-            const pageResult : IPaginationResult<IUserInfoDto>  = response.data;
-            setUsers(pageResult.items);
-            setElementCount(pageResult.pageInfo.totalPageCount);
+            const filter : INewsPageFilter = {
+                pageSize: rowsPerPage, 
+                pageNumber: page
+            };
+            const response = await NewsDataService.getByPageFilter(filter);
+            const pageResult : IPaginationResult<INewsInfoDto>  = response.data;
+            setNews(pageResult.items);
+            setElementCount(pageResult.pageInfo.totalPageCount == 0 ? 1 : pageResult.pageInfo.totalPageCount);
         }
       
           getByFilter()
@@ -103,6 +81,7 @@ const Users = () =>{
           })
           .catch(()=>{
             setAlertMessage(SystemAlertConstants.FetchErrorConstant);
+            setIsLoading(false);
           });
     }
 
@@ -111,59 +90,59 @@ const Users = () =>{
     }, [])
     
 
-    const renderTitleCard = (user: IUserInfoDto) =>{
+    const renderTitleCard = (news: INewsInfoDto) =>{
         return(
             <MuiMaterial.Typography gutterBottom variant="h5" component="div">
-                {user.lastName} {user.firstName} {user.middleName}
+                {news.title}
             </MuiMaterial.Typography>
         )
     }
     
-    const renderActionsCard = (user: IUserInfoDto) =>{
+    const renderActionsCard = (news: INewsInfoDto) =>{
         return (
             <>
-                <MuiMaterial.IconButton aria-label="password" onClick={()=> onUserPasswordChangeClick(user)}>
-                    <MuiIcon.Password/>
-                </MuiMaterial.IconButton>
-
                 <MuiMaterial.IconButton aria-label="edit">
-                    <MuiIcon.Edit onClick={()=>onEditUserClick(user)}/>
+                    <MuiIcon.Edit onClick={()=>onEditUserClick(news)}/>
                 </MuiMaterial.IconButton>
                 
-                <MuiMaterial.IconButton aria-label="drop" onClick={()=> onDeleteUserClick(user)}>
+                <MuiMaterial.IconButton aria-label="drop" onClick={()=> onDeleteUserClick(news)}>
                     <MuiIcon.Delete/>
                 </MuiMaterial.IconButton>
             </>
         )
     }
 
-    const renderUser = (user: IUserInfoDto) => {
+    const renderNews = (news: INewsInfoDto) => {
         return (
-            <MuiMaterial.Card key={user.id} variant="outlined" sx={{
+            <MuiMaterial.Card key={news.id} variant="outlined" sx={{
                 marginTop:'1%'
             }}>
                 <MuiMaterial.CardHeader
-                    avatar={<MuiMaterial.Avatar sx={{width:'100px', height:'100px'}} src={user.attachment?.previewUrl}/>}
-                    title={renderTitleCard(user)}
-                    action={renderActionsCard(user)}>
+                    title={renderTitleCard(news)}
+                    action={renderActionsCard(news)}>
                 </MuiMaterial.CardHeader>
+                <MuiMaterial.CardContent>
+                    <MuiMaterial.Typography variant="body1">
+                        Дата создания: {news.createdAt ? new Date(news.createdAt).toLocaleString('ru-RU'): "Неизветсно"}
+                    </MuiMaterial.Typography>
+                </MuiMaterial.CardContent>
             </MuiMaterial.Card>
         )
     }
 
     return(
     <>
-        <MuiMaterial.Typography variant="h4">Сотрудники</MuiMaterial.Typography>
+        <MuiMaterial.Typography variant="h4">Новости</MuiMaterial.Typography>
         {isLoading ? (
             <Loader/>
         ) : (
             <>
                 <MuiMaterial.Stack alignItems="center">
-                    <MuiMaterial.IconButton area-label='create' onClick={onAddUserClick}>
+                    <MuiMaterial.IconButton area-label='create' onClick={onAddNewsClick}>
                         <MuiIcon.AddCircleOutline fontSize="large"/>
                     </MuiMaterial.IconButton>
                 </MuiMaterial.Stack>
-                {users?.map(user => renderUser(user))}
+                {news?.map(news => renderNews(news))}
                 <MuiMaterial.Pagination
                     color='primary'
                     count={elementCount}
@@ -182,34 +161,27 @@ const Users = () =>{
                         m:2
                     }}
                 />
-            <UserEditModal
+            <NewsEditModal
                 onClose={() => setShowEditModal(false)}
                 onRefresh={onRefresh}
                 showModal={showEditModal}
-                userId={actualUser?.id}
+                newsId={actualNews?.id}
             />
-            <UserCreateModal 
+            <NewsCreateModal 
                 onClose={() => setShowCreateModal(false)} 
                 onRefresh={onRefresh} 
                 showModal={showCreateModal}
             />
 
             <DeleteModal 
-            objectId={actualUser?.id} 
+            objectId={actualNews?.id} 
             showModal={isDeleteDialogOpen} 
             onClose={()=> setIsDeleteDialogOpen(false)}
             handleDeleteConfirm={handleDeleteConfirm}
-            />
-
-            <ChangePasswordModal
-                userId={actualUser?.id}
-                showModal={isChangePasswordDialogOpen}
-                onClose={() => setIsChangePasswordDialogOpen(false)}
-                handleChangePassword={handleChangePassword}
             />
             </>
         )}
     </>
     )}
 
-export default Users;
+export default News;

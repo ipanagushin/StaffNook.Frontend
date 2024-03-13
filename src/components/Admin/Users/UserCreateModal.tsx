@@ -12,6 +12,14 @@ import { IFileDto } from "@/models/FileStorageModels";
 import * as SystemAlertConstants from '@/config/SystemAlertConstants';
 import { alertState } from "@/common/AppAtoms";
 import { useSetRecoilState } from "recoil";
+import PhoneInput from "@/components/PhoneInput";
+import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { ruRU } from '@mui/x-date-pickers/locales';
+import ruLocale from "date-fns/locale/ru";
+import ReferenceSelect from "@/components/ReferenceSelect";
+import { IAvailableValue } from "@/models/AvailableValue";
+import { ReferenceType } from "@/common/ReferenceType";
 
 interface IProps {
   onClose: () => void;
@@ -33,6 +41,8 @@ const UserCreateModal = (modalInfo: IProps) => {
   const [filesError, setFilesError] = useState(false);
   const [phoneError, setPhoneError] = useState(false);
   const [dateOfBirthError, setDateOfBirthError] = useState(false);
+  const [employmentDateError, setEmploymentDateError] = useState(false);
+  const [specialityError, setSpecialityError] = useState(false);
   const [defaultPickedFiles, setDefaultPickedFiles] = useState<IFileDto[]>([]);
   const setAlertMessage = useSetRecoilState(alertState);
 
@@ -118,10 +128,7 @@ const UserCreateModal = (modalInfo: IProps) => {
     setUser((prevUser) => ({ ...prevUser, email: value }));
   };
 
-  const handlePhoneChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value;
-    // todo validate phone
-    setPhoneError(!value.trim());
+  const handlePhoneChange = (value: string) => {
     setUser((prevUser) => ({ ...prevUser, phoneNumber: value }));
   };
 
@@ -163,11 +170,30 @@ const UserCreateModal = (modalInfo: IProps) => {
         setPasswordError(false);
         setPhoneError(false);
         setDateOfBirthError(false);
+        setEmploymentDateError(false);
+        setSpecialityError(false);
         setAlertMessage(SystemAlertConstants.CreateUserSuccessConstant);
     };
 
+    const expression: RegExp = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+
+    if(!user?.roleId){
+      setRoleError(true);
+      return;
+    }
+
     if (!user?.login || user?.login.trim() === "") {
       setLoginError(true);
+      return;
+    }
+
+    if (!user?.email || user?.email.trim() === "" || !expression.test(user?.email)) {
+      setEmailError(true);
+      return;
+    }
+    
+    if (!user?.phoneNumber || user?.phoneNumber.trim() === "" || user?.phoneNumber.length !== 11) {
+      setPhoneError(true);
       return;
     }
 
@@ -184,6 +210,26 @@ const UserCreateModal = (modalInfo: IProps) => {
     if (!user?.lastName || user?.lastName.trim() === "") {
         setLastNameError(true);
         return;
+    }
+
+    if (!user?.dateOfBirth || user?.dateOfBirth.trim() === "") {
+      setDateOfBirthError(true);
+      return;
+    }
+
+    if (!user?.password || user?.password.trim() === "") {
+      setPasswordError(true);
+      return;
+    }
+
+    if (!user?.employmentDate || user?.employmentDate.trim() === "") {
+      setDateOfBirthError(true);
+      return;
+    }
+
+    if (!user?.specialityId) {
+      setSpecialityError(true);
+      return;
     }
 
   //   if (!user?.attachment) {
@@ -215,6 +261,10 @@ const UserCreateModal = (modalInfo: IProps) => {
     setUser(undefined);
   }, [modalInfo.showModal]);
 
+  function handleSpecialityChange(value?: IAvailableValue | null | undefined): void {
+    setUser((prevUser) => ({ ...prevUser, specialityId: value?.value }));
+  }
+
   return (
     <>
       <ContainerLoader Loading={false}>
@@ -238,7 +288,7 @@ const UserCreateModal = (modalInfo: IProps) => {
             </MuiMaterial.IconButton>
           </MuiMaterial.DialogTitle>
           <MuiMaterial.DialogContent>
-            <MuiMaterial.Stack spacing={2}>
+            <MuiMaterial.Stack spacing={3}>
 
                 <MuiMaterial.FormControl>
                     <MuiMaterial.FormLabel>Аватар</MuiMaterial.FormLabel>
@@ -268,6 +318,14 @@ const UserCreateModal = (modalInfo: IProps) => {
                 {roleError && <MuiMaterial.FormHelperText error>Выберите роль</MuiMaterial.FormHelperText>}
               </MuiMaterial.FormControl>
 
+              <ReferenceSelect 
+                customLabel="Специальность"
+                referenceType={ReferenceType.Speciality} 
+                onChange={handleSpecialityChange}
+                error={specialityError}
+                helperText = {specialityError && "Выберите специальность"}
+              />
+
                 <MuiMaterial.TextField
                   label="Логин"
                   variant="standard"
@@ -289,13 +347,9 @@ const UserCreateModal = (modalInfo: IProps) => {
                   helperText={emailError && "Некорректный email"}
                 />
 
-                <MuiMaterial.TextField
-                  label="Номер телефона"
-                  variant="standard"
-                  size="small"
-                  type="tel"
-                  value={user?.phoneNumber}
-                  onChange={handlePhoneChange}
+                <PhoneInput 
+                  value={user?.phoneNumber} 
+                  onChange={handlePhoneChange} 
                   error={phoneError}
                   helperText={phoneError && "Некорректный номер телефона"}
                 />
@@ -330,19 +384,19 @@ const UserCreateModal = (modalInfo: IProps) => {
                   helperText={middleNameError && "Поле не может быть пустым"}
                 />
 
-                <MuiMaterial.TextField
-                  label="Дата рождения"
-                  variant="standard"
-                  size="small"
-                  type="date"
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                  value={user?.dateOfBirth}
-                  onChange={handleDateOfBirthChange}
-                  error={dateOfBirthError}
-                  helperText={dateOfBirthError && "Поле не может быть пустым"}
-                />
+              <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ruLocale} localeText={ruRU.components.MuiLocalizationProvider.defaultProps.localeText}>
+                  <DatePicker 
+                    label="Дата рождения"
+                    value={user?.dateOfBirth ? new Date(user?.dateOfBirth) : null}
+                    onChange={(value)=> setUser({ ...user, dateOfBirth: value?.toISOString() })}
+                    slotProps={{
+                      textField: {
+                        error: !!dateOfBirthError,
+                        helperText: dateOfBirthError && "Некорректная дата"
+                      }
+                    }}
+                     />
+                </LocalizationProvider>
 
               <MuiMaterial.TextField
                     label="Пароль"
@@ -365,7 +419,21 @@ const UserCreateModal = (modalInfo: IProps) => {
                         </MuiMaterial.InputAdornment>
                       ),
                     }}
-              />
+                />
+
+                <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ruLocale} localeText={ruRU.components.MuiLocalizationProvider.defaultProps.localeText}>
+                  <DatePicker 
+                    label="Дата приема"
+                    value={user?.employmentDate ? new Date(user?.employmentDate) : null}
+                    onChange={(value)=> setUser({ ...user, employmentDate: value?.toISOString() })}
+                    slotProps={{
+                      textField: {
+                        error: !!employmentDateError,
+                        helperText: employmentDateError && "Некорректная дата"
+                      }
+                    }}
+                     />
+                </LocalizationProvider>
 
               <MuiMaterial.Button variant="outlined" onClick={onSaveUser}>
                 Сохранить

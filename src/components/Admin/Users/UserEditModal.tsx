@@ -13,6 +13,13 @@ import FileStorageService from "@/services/FileStorageService";
 import { useSetRecoilState } from "recoil";
 import { alertState } from "@/common/AppAtoms";
 import * as SystemAlertConstants from '@/config/SystemAlertConstants';
+import { DatePicker, LocalizationProvider, ruRU } from "@mui/x-date-pickers";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import ruLocale from "date-fns/locale/ru";
+import ReferenceSelect from "@/components/ReferenceSelect";
+import { ReferenceType } from "@/common/ReferenceType";
+import { IAvailableValue } from "@/models/AvailableValue";
+import PhoneInput from "@/components/PhoneInput";
 
 interface IProps {
   userId?: string;
@@ -33,7 +40,10 @@ const UserEditModal = (modalInfo: IProps) => {
   const [roles, setRoles] = useState<IRoleInfoDto[]>([]);
   const [filesError, setFilesError] = useState(false);
   const [dateOfBirthError, setDateOfBirthError] = useState(false);
+  const [specialityError, setSpecialityError] = useState(false);
+  const [phoneError, setPhoneError] = useState(false);
   const [defaultPickedFiles, setDefaultPickedFiles] = useState<IFileDto[]>([]);
+  const [employmentDateError, setEmploymentDateError] = useState(false);
   const setAlertMessage = useSetRecoilState(alertState);
 
   const handleFilePickChange = (files: IFileDto[]) => {
@@ -113,6 +123,10 @@ const UserEditModal = (modalInfo: IProps) => {
     setUser((prevUser) => ({ ...prevUser, roleId: value }));
   };
 
+  const handlePhoneChange = (value: string) => {
+    setUser((prevUser) => ({ ...prevUser, phoneNumber: value }));
+  };
+
   const handleClose = () => {
     setUser(undefined);
     modalInfo.onClose();
@@ -125,6 +139,7 @@ const UserEditModal = (modalInfo: IProps) => {
     setDefaultPickedFiles([]);
     setFilesError(false);
     setDateOfBirthError(false);
+    setEmploymentDateError(false);
   };
 
   const onSaveUser = () => {
@@ -144,8 +159,25 @@ const UserEditModal = (modalInfo: IProps) => {
         setAlertMessage(SystemAlertConstants.UpdateUserSuccessConstant);
     };
 
+    const expression: RegExp = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+
+    if(!user?.roleId){
+      setRoleError(true);
+      return;
+    }
+
     if (!user?.login || user?.login.trim() === "") {
       setLoginError(true);
+      return;
+    }
+
+    if (!user?.email || user?.email.trim() === "" || !expression.test(user?.email)) {
+      setEmailError(true);
+      return;
+    }
+    
+    if (!user?.phoneNumber || user?.phoneNumber.trim() === "" || user?.phoneNumber.length !== 11) {
+      setPhoneError(true);
       return;
     }
 
@@ -164,10 +196,20 @@ const UserEditModal = (modalInfo: IProps) => {
         return;
     }
 
-  //   if (!user?.attachment) {
-  //     setFilesError(true);
-  //     return;
-  // }
+    if (!user?.dateOfBirth || user?.dateOfBirth.trim() === "") {
+      setDateOfBirthError(true);
+      return;
+    }
+
+    if (!user?.employmentDate || user?.employmentDate.trim() === "") {
+      setEmploymentDateError(true);
+      return;
+    }
+
+    if (!user?.specialityId) {
+      setSpecialityError(true);
+      return;
+    }
 
     //todo логика валидации для middleName, email, и roleId
 
@@ -214,6 +256,10 @@ const UserEditModal = (modalInfo: IProps) => {
       .then(() => setIsLoad(false))
       .catch(console.error);
   }, [modalInfo.userId, modalInfo.showModal]);
+
+  function handleSpecialityChange(value?: IAvailableValue | null | undefined): void {
+    setUser((prevUser) => ({ ...prevUser, specialityId: value?.value }));
+  }
 
   return (
     <>
@@ -262,6 +308,13 @@ const UserEditModal = (modalInfo: IProps) => {
                 />
               </MuiMaterial.FormControl>
 
+              <PhoneInput 
+                  value={user?.phoneNumber} 
+                  onChange={handlePhoneChange} 
+                  error={phoneError}
+                  helperText={phoneError && "Некорректный номер телефона"}
+              />
+
               <MuiMaterial.FormControl>
                 <MuiMaterial.FormLabel required>Имя</MuiMaterial.FormLabel>
                 <MuiMaterial.TextField
@@ -298,7 +351,7 @@ const UserEditModal = (modalInfo: IProps) => {
               <MuiMaterial.FormControl>
                 <MuiMaterial.FormLabel required>Роль</MuiMaterial.FormLabel>
                 <MuiMaterial.Select
-                  variant="outlined"
+                  variant="standard"
                   value={user?.roleId || ""}
                   onChange={handleRoleChange}
                   error={roleError}
@@ -316,20 +369,42 @@ const UserEditModal = (modalInfo: IProps) => {
                 {roleError && <MuiMaterial.FormHelperText error>Выберите роль</MuiMaterial.FormHelperText>}
               </MuiMaterial.FormControl>
 
-              <MuiMaterial.TextField
+              <ReferenceSelect 
+                customLabel="Специальность"
+                referenceType={ReferenceType.Speciality} 
+                onChange={handleSpecialityChange}
+                defaultValue={user?.specialityId}
+                error={specialityError}
+                helperText = {specialityError && "Выберите специальность"}
+              />
+
+              <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ruLocale} localeText={ruRU.components.MuiLocalizationProvider.defaultProps.localeText}>
+                <DatePicker 
                   label="Дата рождения"
-                  variant="standard"
-                  size="small"
-                  type="date"
-                  InputLabelProps={{
-                    shrink: true,
+                  value={user?.dateOfBirth ? new Date(user?.dateOfBirth) : null}
+                  onChange={(value)=> setUser({ ...user, dateOfBirth: value?.toISOString() })}
+                  slotProps={{
+                    textField: {
+                      error: !!dateOfBirthError,
+                      helperText: dateOfBirthError && "Некорректная дата"
+                    }
                   }}
-                  value={new Date(user?.dateOfBirth!)}
-                  // value={user?.dateOfBirth}
-                  onChange={handleDateOfBirthChange}
-                  error={dateOfBirthError}
-                  helperText={dateOfBirthError && "Поле не может быть пустым"}
-                />
+                    />
+              </LocalizationProvider>
+
+              <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ruLocale} localeText={ruRU.components.MuiLocalizationProvider.defaultProps.localeText}>
+                  <DatePicker 
+                    label="Дата приема"
+                    value={user?.employmentDate ? new Date(user?.employmentDate) : null}
+                    onChange={(value)=> setUser({ ...user, employmentDate: value?.toISOString() })}
+                    slotProps={{
+                      textField: {
+                        error: !!employmentDateError,
+                        helperText: employmentDateError && "Некорректная дата"
+                      }
+                    }}
+                     />
+                </LocalizationProvider>
 
               <MuiMaterial.FormControl>
                   <MuiMaterial.FormLabel required>Аватар</MuiMaterial.FormLabel>

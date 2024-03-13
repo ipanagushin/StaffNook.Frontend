@@ -10,6 +10,7 @@ export interface ICurrentUserInfo {
   login: string;
   email: string;
   fullName: string;
+  avatarLink?: string;
   // avatarId: string,
 }
 

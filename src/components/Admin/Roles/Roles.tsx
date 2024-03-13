@@ -16,6 +16,7 @@ const Roles = () => {
         const fetchRoles = async () => {
             let roles = await RoleDataService.getAllRoles();
             setRoles(roles.data);
+            debugger;
         }
 
         fetchRoles()

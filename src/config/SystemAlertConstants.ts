@@ -80,6 +80,35 @@ export const ChangePasswordErrorConstant = new AlertState(
   "error"
 );
 
+export const CreateNewsSuccessConstant = new AlertState(
+  "Новость успешно создана",
+  "success"
+);
+
+export const CreateNewsErrorConstant = new AlertState(
+  "Произошла ошибка при создании новости",
+  "error"
+);
+
+export const UpdateNewsSuccessConstant = new AlertState(
+  "Новость успешно изменена",
+  "success"
+);
+
+export const UpdateNewsErrorConstant = new AlertState(
+  "Произошла ошибка при изменении новости",
+  "error"
+);
+
+export const DeleteNewsSuccessConstant = new AlertState(
+  "Новость успешно удалёна",
+  "success"
+);
+export const DeleteNewsErrorConstant = new AlertState(
+  "Произошла ошибка при удалении новости",
+  "error"
+);
+
 export const FetchErrorConstant = new AlertState(
   "Произошла ошибка при получении данных",
   "error"

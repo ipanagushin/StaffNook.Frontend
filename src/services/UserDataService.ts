@@ -1,5 +1,10 @@
+import { IUserPageFilter } from "@/models/PageFilters/UserPageFilter";
 import { IPaginationResult } from "@/models/PaginationModel";
-import { ICreateUserRequest, IUserInfoDto } from "@/models/UserModels";
+import {
+  ICreateUserRequest,
+  IShortUserInfoDto,
+  IUserInfoDto,
+} from "@/models/UserModels";
 import API from "@/utils/API";
 
 class UserDataService {
@@ -19,13 +24,20 @@ class UserDataService {
     return API.get<IUserInfoDto>(`/user/${id}`);
   }
 
-  getByPageFilter(pageNumber: number, pageSize: number) {
+  getAdminByPageFilter(pageNumber: number, pageSize: number) {
     const filter = {
       PageSize: pageSize,
       PageNumber: pageNumber,
     };
 
     return API.post<IPaginationResult<IUserInfoDto>>("/user/filter", filter);
+  }
+
+  getByPageFilter(filter: IUserPageFilter) {
+    return API.post<IPaginationResult<IShortUserInfoDto>>(
+      "/user/employments",
+      filter
+    );
   }
 
   delete(id: string) {

@@ -11,6 +11,8 @@ export interface ICreateUserRequest {
   attachment?: IFileDto;
   roleId?: string;
   dateOfBirth?: string;
+  employmentDate?: string;
+  specialityId?: string;
 }
 
 export interface IUpdateUserRequest {
@@ -24,6 +26,8 @@ export interface IUpdateUserRequest {
   attachment?: IFileDto;
   roleId?: string;
   dateOfBirth?: string;
+  employmentDate?: string;
+  specialityId?: string;
 }
 
 export interface IUserInfoDto {
@@ -36,4 +40,15 @@ export interface IUserInfoDto {
   email?: string;
   attachment?: IFileDto;
   dateOfBirth?: string;
+  employmentDate?: string;
+  specialityId?: string;
+  phoneNumber?: string;
+}
+
+export interface IShortUserInfoDto {
+  id: string;
+  fullName: string;
+  specialityName?: string;
+  employmentDate: string;
+  attachment: IFileDto;
 }

@@ -131,7 +131,7 @@ const RoleEdit = (props: IRoleEditProps) =>{
                             Название
                         </MuiMaterial.FormLabel>
                         <MuiMaterial.TextField 
-                            variant="outlined"
+                            variant="standard"
                             value={role?.name}
                             onChange={(event) => {
                                 setRole(role => ({
