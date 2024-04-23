@@ -1,3 +1,4 @@
+import { IAvailableValue } from "@/models/AvailableValue";
 import { IUserPageFilter } from "@/models/PageFilters/UserPageFilter";
 import { IPaginationResult } from "@/models/PaginationModel";
 import {
@@ -31,6 +32,10 @@ class UserDataService {
     };
 
     return API.post<IPaginationResult<IUserInfoDto>>("/user/filter", filter);
+  }
+
+  getAvailableValues(){
+    return API.get<IAvailableValue[]>(`/user/availableValues`);
   }
 
   getByPageFilter(filter: IUserPageFilter) {

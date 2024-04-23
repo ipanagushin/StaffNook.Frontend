@@ -5,7 +5,7 @@ import ContainerLoader from "@/components/ContainerLoader";
 import ProjectDataService from "@/services/ProjectDataService";
 import { alertState } from "@/common/AppAtoms";
 import { useSetRecoilState } from "recoil";
-import { ICreateProjectDto, IProjectContactDto } from "@/models/ProjectModels";
+import { ICreateProjectDto, IProjectContactDto, IProjectRoleDto } from "@/models/ProjectModels";
 import * as SystemAlertConstants from '@/config/SystemAlertConstants';
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
@@ -16,6 +16,7 @@ import { ReferenceType } from "@/common/ReferenceType";
 import { IAvailableValue } from "@/models/AvailableValue";
 import { TransitionGroup } from 'react-transition-group';
 import ClientSelect from "@/components/ClientSelect";
+import UserSelect from "@/components/UserSelect";
 
 interface IProps {
   onClose: () => void;
@@ -25,8 +26,8 @@ interface IProps {
 
 const ProjectCreateModal = (modalInfo: IProps) => {
   const [project, setProject] = useState<ICreateProjectDto>();
-  const [contacts, setContacts] = useState<IProjectContactDto[]>([]);
   const [newContact, setNewContact] = useState<IProjectContactDto>();
+  const [newRole, setNewRole] = useState<IProjectRoleDto>();
   const [nameError, setNameError] = useState(false);
   const [userIdError, setUserIdError] = useState(false);
   const [clientIdError, setClientIdError] = useState(false);
@@ -42,7 +43,6 @@ const ProjectCreateModal = (modalInfo: IProps) => {
 
   const handleClose = () => {
     setProject(undefined);
-    setContacts([]);
     setNewContact(undefined);
     setActiveTab('contacts');
     modalInfo.onClose();
@@ -57,10 +57,34 @@ const ProjectCreateModal = (modalInfo: IProps) => {
     }));
   };
 
+  const handleRolesChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    
+    setNewRole(prevRole => ({
+      ...prevRole,
+      [name]: value
+    }));
+  };
+
+  const handleAddRole = () => {
+    if (newRole?.name && newRole?.hourlyFee) {
+      setProject((prevProject) => ({
+        ...prevProject,
+        roles: [...prevProject?.roles ?? [], newRole],
+      }))
+    //   setNewContact(undefined);
+    } else {
+      // Handle validation errors or display a message to the user
+    }
+  };
+
   // todo add validation
   const handleAddContact = () => {
     if (newContact?.firstName && newContact?.lastName && newContact?.emailAddress) {
-      setContacts(prevContacts => [...prevContacts, newContact]);
+      setProject((prevProject) => ({
+        ...prevProject,
+        contacts: [...prevProject?.contacts ?? [], newContact],
+      }))
     //   setNewContact(undefined);
     } else {
       // Handle validation errors or display a message to the user
@@ -68,7 +92,23 @@ const ProjectCreateModal = (modalInfo: IProps) => {
   };
 
   const handleRemoveContact = (index: number) => {
-    setContacts(prevContacts => prevContacts.filter((_, i) => i !== index));
+    let contacts = project?.contacts ?? [];
+    contacts = contacts.filter((_, i) => i !== index);
+
+    setProject((prevProject) => ({
+      ...prevProject,
+      contacts: contacts,
+    }))
+  };
+
+  const handleRemoveRole = (index: number) => {
+    let roles = project?.roles ?? [];
+    roles = roles.filter((_, i) => i !== index);
+
+    setProject((prevProject) => ({
+      ...prevProject,
+      roles: roles,
+    }))
   };
 
   const clearErrors = () => {
@@ -89,12 +129,10 @@ const ProjectCreateModal = (modalInfo: IProps) => {
     }));
   };
 
-  const handleUserIdChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value;
-    setUserIdError(!value.trim());
+  const handleUserIdChange = (value?: IAvailableValue | null) => {
     setProject((prevProject) => ({
       ...prevProject,
-      userId: value,
+      userId: value?.value,
     }));
   };
 
@@ -183,14 +221,12 @@ const ProjectCreateModal = (modalInfo: IProps) => {
             helperText={nameError && "Поле не может быть пустым"}
         />
 
-        <MuiMaterial.TextField
-            label="Руководитель проекта"
-            variant="standard"
-            size="medium"
-            value={project?.userId}
-            onChange={handleUserIdChange}
-            error={userIdError}
-            helperText={userIdError && "Поле не может быть пустым"}
+        <UserSelect
+          customLabel="Руководитель проекта"
+          onChange={handleUserIdChange}
+          defaultValue={project?.userId}
+          error={userIdError}
+          helperText={userIdError && "Поле не может быть пустым"}
         />
 
         <ClientSelect
@@ -205,7 +241,7 @@ const ProjectCreateModal = (modalInfo: IProps) => {
             <DatePicker 
                 label="Дата начала"
                 value={project?.startDate ? new Date(project?.startDate) : null}
-                onChange={(value)=> handleStartDateChange(value?.toISOString())}
+                onChange={(value)=> handleStartDateChange(value?.toISOString().split('T')[0])}
                 slotProps={{
                     textField: {
                     error: !!startDateError,
@@ -219,7 +255,7 @@ const ProjectCreateModal = (modalInfo: IProps) => {
             <DatePicker 
                 label="Дата окончания"
                 value={project?.endDate ? new Date(project?.endDate) : null}
-                onChange={(value)=> handleEndDateChange(value?.toISOString())}
+                onChange={(value)=> handleEndDateChange(value?.toISOString().split('T')[0])}
                 slotProps={{
                     textField: {
                     error: !!endDateError,
@@ -282,7 +318,7 @@ const ProjectCreateModal = (modalInfo: IProps) => {
                 <MuiMaterial.Divider variant="middle"/>
             <MuiMaterial.List>
                 <TransitionGroup>
-                    {contacts.map((contact, index) => (
+                    {project?.contacts?.map((contact, index) => (
                         <MuiMaterial.Collapse key={index}>
                             <MuiMaterial.ListItem component={MuiMaterial.Paper} variant="outlined">
                                 <MuiMaterial.ListItemText
@@ -302,15 +338,61 @@ const ProjectCreateModal = (modalInfo: IProps) => {
                             </MuiMaterial.ListItem>
                         </MuiMaterial.Collapse>
                     ))}
-                    {contacts.length === 0 && <MuiMaterial.ListItem>Нет контактов</MuiMaterial.ListItem>}
+                    {project?.contacts?.length === 0 && <MuiMaterial.ListItem>Нет контактов</MuiMaterial.ListItem>}
                 </TransitionGroup>
             </MuiMaterial.List>
         </MuiMaterial.Box>
     );
 
     const renderRolesTab = () => (
-        <MuiMaterial.Box minHeight={100}>
-            
+      <MuiMaterial.Box minHeight={100}>
+        <MuiMaterial.Container sx={{ textAlign: "center", mb: 2 }}>
+            <MuiMaterial.Stack 
+                spacing={2} 
+                divider={<MuiMaterial.Divider orientation="vertical" flexItem />} 
+                direction={{ xs: 'column', sm: 'row' }}
+            >
+              <MuiMaterial.TextField
+                  name="name"
+                  label="Название роли"
+                  value={newRole?.name}
+                  variant="standard"
+                  onChange={handleRolesChange}
+              />
+              
+              <MuiMaterial.TextField
+                name="hourlyFee"
+                label="Ставка за час"
+                value={newRole?.hourlyFee}
+                variant="standard"
+                type="number"
+                onChange={handleRolesChange}
+              />
+
+            </MuiMaterial.Stack>
+            <MuiMaterial.Button sx={{ mt:2 }} variant="contained" onClick={handleAddRole}>Добавить роль</MuiMaterial.Button>
+            </MuiMaterial.Container>
+            <MuiMaterial.Divider variant="middle"/>
+            <MuiMaterial.List>
+                <TransitionGroup>
+                    {project?.roles?.map((role, index) => (
+                        <MuiMaterial.Collapse key={index}>
+                            <MuiMaterial.ListItem component={MuiMaterial.Paper} variant="outlined">
+                                <MuiMaterial.ListItemText
+                                    primary={`${role.name}`}
+                                    secondary={<MuiMaterial.Typography variant="subtitle2">{role.hourlyFee} ₽</MuiMaterial.Typography>}
+                                />
+                                <MuiMaterial.ListItemSecondaryAction>
+                                <MuiMaterial.IconButton edge="end" onClick={() => handleRemoveRole(index)}>
+                                    <MuiIcon.Delete/>
+                                </MuiMaterial.IconButton>
+                                </MuiMaterial.ListItemSecondaryAction>
+                            </MuiMaterial.ListItem>
+                        </MuiMaterial.Collapse>
+                    ))}
+                    {project?.roles?.length === 0 && <MuiMaterial.ListItem>Нет ролей</MuiMaterial.ListItem>}
+                </TransitionGroup>
+            </MuiMaterial.List>
         </MuiMaterial.Box>
     );
 

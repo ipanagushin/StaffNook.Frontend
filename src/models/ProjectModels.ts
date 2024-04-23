@@ -73,12 +73,12 @@ export interface IProjectRoleDto {
   /**
    * Наименование
    */
-  name: string;
+  name?: string;
 
   /**
    * Ставка за час
    */
-  hourlyFee: number;
+  hourlyFee?: number;
 
   /**
    * Проект
