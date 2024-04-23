@@ -77,6 +77,7 @@ const References = () => {
 
     const allReferences : IAvailableValue[] = [
         {value: ReferenceType.Speciality, name: "Специальности"},
+        {value: ReferenceType.ProjectType, name: "Тип проекта"},
     ]
 
     return<>

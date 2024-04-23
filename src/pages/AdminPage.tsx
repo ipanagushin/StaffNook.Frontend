@@ -1,9 +1,7 @@
 import AdminLayout from "@/components/Admin/AdminLayout";
 import { GroupedMenuItems } from "@/components/Admin/Header/MenuItems";
-import Loader from "@/components/Loader";
 import IdentityService from "@/services/IdentityService";
-import userDataService from "@/services/UserDataService";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 
 type AdminPageRouteParams = {

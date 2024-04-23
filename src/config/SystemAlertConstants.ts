@@ -109,6 +109,48 @@ export const DeleteNewsErrorConstant = new AlertState(
   "error"
 );
 
+export const DeleteProjectSuccessConstant = new AlertState(
+  "Проект успешно удалён",
+  "success"
+);
+export const DeleteProjectErrorConstant = new AlertState(
+  "Произошла ошибка при удалении проекта",
+  "error"
+);
+
+/* Клиенты */
+
+export const CreateClientSuccessConstant = new AlertState(
+  "Клиент успешно создан",
+  "success"
+);
+
+export const CreateClientErrorConstant = new AlertState(
+  "Произошла ошибка при создании клиента",
+  "error"
+);
+
+export const UpdateClientSuccessConstant = new AlertState(
+  "Клиент успешно изменен",
+  "success"
+);
+
+export const UpdateClientErrorConstant = new AlertState(
+  "Произошла ошибка при изменении клиента",
+  "error"
+);
+
+export const DeleteClientSuccessConstant = new AlertState(
+  "Клиент успешно удалён",
+  "success"
+);
+export const DeleteClientErrorConstant = new AlertState(
+  "Произошла ошибка при удалении клиента",
+  "error"
+);
+
+/* Стандартные ошибки */
+
 export const FetchErrorConstant = new AlertState(
   "Произошла ошибка при получении данных",
   "error"

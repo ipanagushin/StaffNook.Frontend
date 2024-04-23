@@ -1,4 +1,6 @@
+import Clients from "../Client/Clients";
 import News from "../News/News";
+import Projects from "../Project/Projects";
 import References from "../References/References";
 import Roles from "../Roles/Roles";
 import Users from "../Users/Users";
@@ -96,6 +98,21 @@ const Basic : IAdminMenuItem[] = [
     },
 ]
 
+const ProjectsControl : IAdminMenuItem[] = [
+    {
+        Name: "Клиенты",
+        Path: "/admin/clients",
+        PageId: "clients",
+        Component: <Clients/>
+    },
+    {
+        Name: "Проекты",
+        Path: "/admin/projects",
+        PageId: "projects",
+        Component: <Projects/>
+    },
+]
+
 const Settings : IAdminMenuItem[] = [
     {
         Name: "Роли",
@@ -117,7 +134,11 @@ export const GroupedMenuItems :IGroupAdminMenu[] = [
         MenuItems: Basic
     },
     {
+        Name: "Управление проектами",
+        MenuItems: ProjectsControl
+    },
+    {
         Name: "Настройки системы",
         MenuItems: Settings
-    },
+    },    
 ]
