@@ -1,6 +1,6 @@
 import { IProjectPageFilter } from "@/models/PageFilters/ProjectPageFilter";
 import { IPaginationResult } from "@/models/PaginationModel";
-import { ICreateProjectDto, IProjectInfoDto } from "@/models/ProjectModels";
+import { ICreateProjectDto, IProjectInfoDto, IUpdateProjectDto } from "@/models/ProjectModels";
 import API from "@/utils/API";
 
 class ProjectDataService {
@@ -8,9 +8,9 @@ class ProjectDataService {
     return API.post("/project", project);
   }
 
-  // updateProject(id: string, project: IUpdateProjectDto) {
-  //   return API.put(`/project/${id}`, project);
-  // }
+  updateProject(id: string, project: IUpdateProjectDto) {
+    return API.put(`/project/${id}`, project);
+  }
 
   getProjectById(id: string) {
     return API.get<IProjectInfoDto>(`/project/${id}`);

@@ -42,6 +42,48 @@ export interface ICreateProjectDto {
   roles?: IProjectRoleDto[];
 }
 
+export interface IUpdateProjectDto {
+  /**
+   * Название проекта
+   */
+  name?: string;
+
+  /**
+   * Руководитель проекта
+   */
+  userId?: string;
+
+  /**
+   * Клиент (заказчик)
+   */
+  clientId?: string;
+
+  /**
+   * Дата начала
+   */
+  startDate?: string;
+
+  /**
+   * Дата окончания
+   */
+  endDate?: string;
+
+  /**
+   * Тип проекта
+   */
+  projectTypeId?: string;
+
+  /**
+   * Контакты проекта
+   */
+  contacts?: IProjectContactDto[];
+
+  /**
+   * Роли на проекте
+   */
+  roles?: IProjectRoleDto[];
+}
+
 export interface IProjectContactDto {
   /**
    * Имя

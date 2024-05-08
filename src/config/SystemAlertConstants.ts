@@ -80,6 +80,8 @@ export const ChangePasswordErrorConstant = new AlertState(
   "error"
 );
 
+/* Новости */
+
 export const CreateNewsSuccessConstant = new AlertState(
   "Новость успешно создана",
   "success"
@@ -106,6 +108,17 @@ export const DeleteNewsSuccessConstant = new AlertState(
 );
 export const DeleteNewsErrorConstant = new AlertState(
   "Произошла ошибка при удалении новости",
+  "error"
+);
+
+/* Проекты */
+
+export const CreateProjectSuccessConstant = new AlertState(
+  "Проект успешно создан",
+  "success"
+);
+export const CreateProjectErrorConstant = new AlertState(
+  "Произошла ошибка при создании проекта",
   "error"
 );
 

@@ -201,12 +201,12 @@ const ProjectCreateModal = (modalInfo: IProps) => {
       setProject(undefined);
       modalInfo.onClose();
       modalInfo.onRefresh();
-    //   setAlertMessage(SystemAlertConstants.CreateProjectSuccessConstant);
+      setAlertMessage(SystemAlertConstants.CreateProjectSuccessConstant);
     };
 
     ProjectDataService.createProject(project)
       .then(postAct)
-    //   .catch(() => setAlertMessage(SystemAlertConstants.CreateProjectErrorConstant));
+      .catch(() => setAlertMessage(SystemAlertConstants.CreateProjectErrorConstant));
   };
 
   const renderBaseFields = () => (
@@ -396,6 +396,26 @@ const ProjectCreateModal = (modalInfo: IProps) => {
         </MuiMaterial.Box>
     );
 
+    const renderEmployeesTab = () => (
+      <MuiMaterial.Box minHeight={100}>
+        <MuiMaterial.List>
+          <TransitionGroup>
+            {project?.employees?.map((employee, index) => (
+              <MuiMaterial.Collapse key={index}>
+                <MuiMaterial.ListItem component={MuiMaterial.Paper} variant="outlined">
+                  <MuiMaterial.ListItemText
+                    primary={`${employee.firstName} ${employee.lastName}`}
+                    secondary={`${employee.emailAddress}`}
+                  />
+                </MuiMaterial.ListItem>
+              </MuiMaterial.Collapse>
+            ))}
+            {project?.employees?.length === 0 && <MuiMaterial.ListItem>Нет сотрудников</MuiMaterial.ListItem>}
+          </TransitionGroup>
+        </MuiMaterial.List>
+      </MuiMaterial.Box>
+    );
+
   return (
     <>
       <ContainerLoader Loading={false}>
@@ -427,6 +447,10 @@ const ProjectCreateModal = (modalInfo: IProps) => {
             >
               <MuiMaterial.Tab label="Контакты проекта" value="contacts" />
               <MuiMaterial.Tab label="Роли на проекте" value="roles" />
+              <MuiMaterial.Tab
+                label="Сотрудники на проекте"
+                value="employees"
+              />
             </MuiMaterial.Tabs>
             <MuiMaterial.Box role="tabpanel">
                 <MuiMaterial.Collapse in={activeTab === "contacts"}>
@@ -434,6 +458,9 @@ const ProjectCreateModal = (modalInfo: IProps) => {
                 </MuiMaterial.Collapse>
                 <MuiMaterial.Collapse in={activeTab === "roles"}>
                     {renderRolesTab()}
+                </MuiMaterial.Collapse>
+                <MuiMaterial.Collapse in={activeTab === "employees"}>
+                    {renderEmployeesTab()}
                 </MuiMaterial.Collapse>
             </MuiMaterial.Box>
 
