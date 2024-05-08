@@ -108,12 +108,16 @@ const Projects = () =>{
     const renderActionsCard = (project: IProjectInfoDto) =>{
         return (
             <>
-                <MuiMaterial.IconButton aria-label="show">
-                    <PreviewIcon onClick={()=>handleViewProject(project)}/>
+                <MuiMaterial.IconButton aria-label="show" onClick={()=>handleViewProject(project)}>
+                    <PreviewIcon />
                 </MuiMaterial.IconButton>
 
-                <MuiMaterial.IconButton aria-label="edit">
-                    <MuiIcon.Edit onClick={()=>onEditProjectClick(project)}/>
+                <MuiMaterial.IconButton aria-label="badge" onClick={()=>onEditProjectClick(project)}>
+                    <MuiIcon.Badge/>
+                </MuiMaterial.IconButton>
+
+                <MuiMaterial.IconButton aria-label="edit" onClick={()=>onEditProjectClick(project)}>
+                    <MuiIcon.Edit />
                 </MuiMaterial.IconButton>
                 
                 <MuiMaterial.IconButton aria-label="drop" onClick={()=> onDeleteProjectClick(project)}>
