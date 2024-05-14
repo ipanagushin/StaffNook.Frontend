@@ -107,10 +107,10 @@ const AvatarImageUploader: React.FC<FileUploaderProps> = ({ filePath, onChange: 
             <ReactAvatarEditor
               ref={(ref) => setEditor(ref)}
               image={previewImage}
-              width={200}
-              height={200}
+              width={350}
+              height={350}
               border={80}
-              borderRadius={100}
+              borderRadius={200}
               color={[0, 0, 0, 0.6]} // RGBA
               scale={scale}
               rotate={0}
@@ -119,7 +119,7 @@ const AvatarImageUploader: React.FC<FileUploaderProps> = ({ filePath, onChange: 
           <MuiMaterial.Slider
             value={scale}
             min={1}
-            max={2}
+            max={3}
             step={0.1}
             onChange={handleScaleChange}
           />

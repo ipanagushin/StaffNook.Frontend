@@ -4,9 +4,10 @@ import { IShortUserInfoDto } from '@/models/UserModels';
 
 interface UserListTableProps {
   users?: IShortUserInfoDto[];
+  onUserClick: (userId: string) => void;
 }
 
-const UserListTable: React.FC<UserListTableProps> = ({ users }) => {
+const UserListTable: React.FC<UserListTableProps> = ({ users, onUserClick }) => {
   return (
     <Container maxWidth='xl' sx={{ mt: 2}}>
       <TableContainer component={Paper}>
@@ -21,7 +22,7 @@ const UserListTable: React.FC<UserListTableProps> = ({ users }) => {
           </TableHead>
           <TableBody>
             {users && users.map(user => (
-              <TableRow key={user.id}>
+              <TableRow hover key={user.id} onClick={() => onUserClick(user.id)} sx={{ '&:hover': { cursor: 'pointer' } }}>
                 <TableCell>
                   <Avatar src={user.attachment?.previewUrl} alt="Avatar" />
                 </TableCell>
