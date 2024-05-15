@@ -4,7 +4,7 @@ export interface ITokenInfo {
 }
 
 export interface ICurrentUserInfo {
-  id: number;
+  id: string;
   roleId: string;
   isAdmin: boolean;
   login: string;

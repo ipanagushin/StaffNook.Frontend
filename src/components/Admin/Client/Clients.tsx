@@ -8,7 +8,7 @@ import { IPaginationResult } from "@/models/PaginationModel";
 import { useSetRecoilState } from "recoil";
 import { alertState } from "@/common/AppAtoms";
 import * as SystemAlertConstants from '@/config/SystemAlertConstants';
-import DeleteModal from "../DeleteModal";
+import DeleteModal from "../../DeleteModal";
 import { IClientInfoDto } from "@/models/ClientModels";
 import { IClientPageFilter } from "@/models/PageFilters/ClientPageFilter";
 import ClientCreateModal from "./ClientCreateModal";

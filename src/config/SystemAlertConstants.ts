@@ -162,6 +162,17 @@ export const DeleteClientErrorConstant = new AlertState(
   "error"
 );
 
+/* Отчеты */
+
+export const DeleteTimeReportSuccessConstant = new AlertState(
+  "Отчет успешно удалён",
+  "success"
+);
+export const DeleteTimeReportErrorConstant = new AlertState(
+  "Произошла ошибка при удалении отчета",
+  "error"
+);
+
 /* Стандартные ошибки */
 
 export const FetchErrorConstant = new AlertState(

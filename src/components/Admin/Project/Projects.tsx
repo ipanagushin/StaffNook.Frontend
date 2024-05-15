@@ -8,7 +8,7 @@ import { IPaginationResult } from "@/models/PaginationModel";
 import { useSetRecoilState } from "recoil";
 import { alertState } from "@/common/AppAtoms";
 import * as SystemAlertConstants from '@/config/SystemAlertConstants';
-import DeleteModal from "../DeleteModal";
+import DeleteModal from "../../DeleteModal";
 import { IProjectInfoDto } from "@/models/ProjectModels";
 import { IProjectPageFilter } from "@/models/PageFilters/ProjectPageFilter";
 import ProjectInfoModal from "./ProjectInfoModal";

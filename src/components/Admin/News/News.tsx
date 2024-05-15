@@ -8,7 +8,7 @@ import { IPaginationResult } from "@/models/PaginationModel";
 import { useSetRecoilState } from "recoil";
 import { alertState } from "@/common/AppAtoms";
 import * as SystemAlertConstants from '@/config/SystemAlertConstants';
-import DeleteModal from "../DeleteModal";
+import DeleteModal from "../../DeleteModal";
 import { INewsInfoDto } from "@/models/NewsModels";
 import { INewsPageFilter } from "@/models/PageFilters/NewsPageFilter";
 import NewsCreateModal from "./NewsCreateModal";

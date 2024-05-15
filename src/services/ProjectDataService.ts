@@ -1,3 +1,4 @@
+import { IAvailableValue } from "@/models/AvailableValue";
 import { IProjectPageFilter } from "@/models/PageFilters/ProjectPageFilter";
 import { IPaginationResult } from "@/models/PaginationModel";
 import { ICreateProjectDto, IProjectInfoDto, IUpdateProjectDto } from "@/models/ProjectModels";
@@ -25,6 +26,10 @@ class ProjectDataService {
 
   delete(id: string) {
     return API.delete(`/project/${id}`);
+  }
+
+  getAvailableValues(){
+    return API.get<IAvailableValue[]>(`/project/availableValues`);
   }
 }
 

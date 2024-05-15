@@ -1,4 +1,5 @@
 import { IFileDto } from "./FileStorageModels";
+import { IInterestInfoDto } from "./InterestModels";
 
 export interface ICreateUserRequest {
   firstName?: string;
@@ -37,12 +38,15 @@ export interface IUserInfoDto {
   firstName?: string;
   middleName?: string;
   roleId?: string;
+  roleName?: string;
   email?: string;
   attachment?: IFileDto;
   dateOfBirth?: string;
   employmentDate?: string;
   specialityId?: string;
+  specialityName?: string;
   phoneNumber?: string;
+  interests?: IInterestInfoDto[];
 }
 
 export interface IShortUserInfoDto {
@@ -51,4 +55,16 @@ export interface IShortUserInfoDto {
   specialityName?: string;
   employmentDate: string;
   attachment: IFileDto;
+}
+
+export interface IUserProjectHistoryDto {
+  clientId: string;
+  clientName: string;
+  projectId: string;
+  projectName: string;
+  projectRoleId: string;
+  projectRoleName: string;
+  workingTime: number;
+  startDate: string;
+  endDate: string;
 }

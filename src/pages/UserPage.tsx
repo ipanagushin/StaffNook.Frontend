@@ -13,7 +13,7 @@ import UserModal from '@/components/User/UserModal';
 const UserPage: React.FC = () => {
   const [filter, setFilter] = React.useState<IUserPageFilter>({pageSize: 10, pageNumber: 1});
   const [paginationResult, setPaginationResult] = React.useState<IPaginationResult<IShortUserInfoDto>>();
-  const [selectedUserId, setSelectedUserId] = React.useState<string | null>(null);
+  const [selectedUserId, setSelectedUserId] = React.useState<string | undefined | null>(null);
   
   React.useEffect(() => {
     UserDataService.getByPageFilter(filter).then(result => {

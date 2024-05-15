@@ -9,7 +9,7 @@ import { IPaginationResult } from "@/models/PaginationModel";
 import { useSetRecoilState } from "recoil";
 import { alertState } from "@/common/AppAtoms";
 import * as SystemAlertConstants from '@/config/SystemAlertConstants';
-import DeleteModal from "../DeleteModal";
+import DeleteModal from "../../DeleteModal";
 import UserEditModal from "./UserEditModal";
 import UserCreateModal from "./UserCreateModal";
 import ChangePasswordModal from "./ChangePasswordModal";

@@ -1,22 +1,47 @@
-import React, { useState } from 'react';
-import { Button, Grid, Typography, IconButton } from '@mui/material';
+import React, { useState, useEffect, useRef } from 'react';
+import { Button, Grid, Typography, IconButton, Dialog, Box, Stack, DialogTitle, Divider, Container } from '@mui/material';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import ReportModalContent from '@/components/WorkingTime/ReportModalContent';
+import WorkingTimeDataService from '@/services/WorkingTimeDataService';
+import { IProductionCalendarModel, IWorkingTimeInfoDto } from '@/models/WorkingTimeModels';
+import * as MuiIcon from "@mui/icons-material";
+import { blue } from '@mui/material/colors';
 
 interface CalendarProps {
   // todo
 }
 
-  // Мок-данные для списанных часов и отчетов
-  const mockData = [
-    { date: 3, hours: 4 },
-    { date: 7, hours: 6 },
-    { date: 15, hours: 2 },
-  ];
-
-
 const Calendar: React.FC<CalendarProps> = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [showReportModal, setShowReportModal] = useState(false); 
+  const [calendarData, setCalendarData] = useState<IProductionCalendarModel[]>([]);
+  const [reportsData, setReportsData] = useState<IWorkingTimeInfoDto[]>([]);
+  const currentDateRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    fetchCalendarData();
+  }, [currentDate]);
+
+  useEffect(() => {
+    if (currentDateRef.current) {
+      currentDateRef.current.scrollIntoView({ behavior: 'smooth', block: 'center', inline:'nearest' });
+    }
+  })
+
+  const fetchCalendarData = async () => {
+    const from = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).toISOString();
+    const to = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).toISOString();
+
+    try {
+      const response = await WorkingTimeDataService.getCalendarByDates(from, to);
+      setCalendarData(response.data.calendar);
+      setReportsData(response.data.reports);
+    } catch (error) {
+      console.error('Error fetching calendar data:', error);
+    }
+  };
 
   const handlePrevMonth = () => {
     setCurrentDate((prevDate) => new Date(prevDate.getFullYear(), prevDate.getMonth() - 1, 1));
@@ -26,8 +51,27 @@ const Calendar: React.FC<CalendarProps> = () => {
     setCurrentDate((prevDate) => new Date(prevDate.getFullYear(), prevDate.getMonth() + 1, 1));
   };
 
+  const handleDayClick = (dayOfMonth: number) => {
+    setSelectedDate(new Date(currentDate.getFullYear(), currentDate.getMonth(), dayOfMonth));
+    setShowReportModal(true);
+  };
+
+  const handleCloseReportModal = () => {
+    setShowReportModal(false);
+  };
+
+  const calculateHoursForDay = (date: string): number => {
+    const reportsForDay = reportsData.filter(report => report.reportDate === date);
+    return reportsForDay.reduce((totalHours, report) => totalHours + report.time, 0);
+  };
+
+  const getReportsForCurrentDay = (date: Date): IWorkingTimeInfoDto[] => {
+    const formattedDate = date.toISOString().split('T')[0];
+    return reportsData.filter(report => report.reportDate.split('T')[0] === formattedDate);
+  };
+
   return (
-    <div style={{maxWidth: '100%', padding: '1rem 1rem 0'}}>
+    <Container maxWidth={'xl'} sx={{pt: 2, userSelect:'none'}}>
       <Grid container alignItems="center" justifyContent="space-between" style={{ marginBottom: '16px' }}>
         <Grid item>
           <IconButton onClick={handlePrevMonth}>
@@ -45,30 +89,51 @@ const Calendar: React.FC<CalendarProps> = () => {
           </IconButton>
         </Grid>
       </Grid>
-      <Grid container spacing={2} style={{display: 'flex', flexWrap: 'unset', overflowX: 'auto', padding: '1rem 0 0 1rem'}}>
-        {Array.from({ length: 31 }, (_, index) => {
-          const dayDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), index + 1);
-          const dayOfMonth = dayDate.getDate();
-          const monthName = dayDate.toLocaleString('ru-RU', { month: 'short' });
+      <Stack style={{ overflowX: 'auto', whiteSpace: 'nowrap' }} direction="row">
+      {calendarData.map((day) => {
+        const dayDate = new Date(day.date);
+        const dayOfMonth = dayDate.getDate();
+        const monthName = dayDate.toLocaleString('ru-RU', { month: 'short' });
+        const hours = calculateHoursForDay(day.date);
 
-          const dayData = mockData.find((item) => item.date === dayOfMonth);
-
-          return (
-            <Grid item key={index} style={{ border: '1px solid #ccc', padding: '8px', textAlign: 'center' }}>
-              <div>
-                <Typography variant="body2">{dayOfMonth} {monthName}</Typography>
-                <hr/>
-                {/* <Typography variant="body2"></Typography> */}
-                <Typography variant="subtitle2">{dayData ? dayData.hours : 0}</Typography>
-                <Button variant="text" size="small" fullWidth>
-                  +
-                </Button>
-              </div>
-            </Grid>
-          );
-        })}
-      </Grid>
-    </div>
+        return (
+          <Box
+            key={day.date}
+            style={{ border: '1px solid #ccc', padding: '8px', userSelect:'none'}}
+            bgcolor={dayDate.toDateString() === new Date().toDateString() ? blue['A100'] : ''}
+            ref={dayDate.getDate() === new Date().getDate() ? currentDateRef : null}
+          >
+            <Stack direction={'column'} spacing={1} divider={<Divider orientation="horizontal" flexItem />}>
+              <Typography variant="body2">{dayOfMonth} {monthName}</Typography>
+              <Button variant="contained" size="small" color={
+                  day.isDayOff ? 'error' :
+                  day.isShortDay ? (hours >= 7 ? 'success' : 'warning') :
+                  hours >= 8 ? 'success' : 'warning'
+                } onClick={() => handleDayClick(dayOfMonth)} fullWidth>
+                {hours} ч
+              </Button>
+            </Stack>
+          </Box>
+        );
+      })}
+      </Stack>
+      <Dialog open={showReportModal} onClose={handleCloseReportModal} fullWidth maxWidth="md">
+        <DialogTitle>Отчеты за {selectedDate.toLocaleDateString('ru-RU')}
+        <IconButton
+                aria-label="close"
+                onClick={handleCloseReportModal}
+                sx={{
+                  position: "absolute",
+                  right: 8,
+                  top: 8,
+                }}
+              >
+                <MuiIcon.Close />
+        </IconButton>
+        </DialogTitle>
+        <ReportModalContent reports={getReportsForCurrentDay(selectedDate)} onRefresh={fetchCalendarData} />
+      </Dialog>
+    </Container>
   );
 };
 

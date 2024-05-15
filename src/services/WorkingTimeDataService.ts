@@ -1,6 +1,7 @@
 import {
     ICreateWorkingTimeDto,
     IUpdateWorkingTimeDto,
+    IWorkingTimeCalendarDto,
     IWorkingTimeInfoDto,
   } from "@/models/WorkingTimeModels";
   import { IWorkingTimePageFilter } from "@/models/PageFilters/WorkingTimePageFilter";
@@ -29,6 +30,14 @@ import {
   
     deleteWorkingTime(id: string) {
       return API.delete(`/working-time/${id}`);
+    }
+
+    getByDate(date: string) {
+      return API.get<IWorkingTimeInfoDto[]>(`/working-time/date/${date}`);
+    }
+
+    getCalendarByDates(from:string, to:string){
+      return API.get<IWorkingTimeCalendarDto>(`/working-time/calendar/${from}/${to}`);
     }
   }
   
